@@ -1,0 +1,10 @@
+# subject, relation, object
+user:youssef, owner, account:123
+branch:tunis, branch, account:123
+user:leila, manager, branch:tunis
+bank:dinarbank, bank, branch:tunis
+user:sonia, auditor, bank:dinarbank
+# Banque de Carthage — only for the cross-tenant denial
+user:fatma, owner, account:999
+branch:carthage, branch, account:999
+bank:carthage, bank, branch:carthage
