@@ -57,3 +57,16 @@ def test_build_enforcer_is_cwd_independent(tmp_path, monkeypatch):
     e = build_enforcer()
     assert decide(e, "amine", "account", "transfer",
                   amount=8000, hour=9, sub_branch="Tunis", obj_branch="Tunis") is True
+
+
+def test_run_demo_returns_six_rows_with_the_flip(enforcer):
+    from main import run_demo
+    rows = run_demo(enforcer)
+    assert len(rows) == 6
+    d = {(s, amt, br, hr): allowed for (s, amt, br, hr, allowed) in rows}
+    assert d[("amine", 8000, "Tunis", 9)] is True     # within hours
+    assert d[("amine", 8000, "Tunis", 22)] is False    # THE flip: after hours
+    assert d[("amine", 12000, "Tunis", 9)] is False    # over limit
+    assert d[("amine", 8000, "Sfax", 9)] is False       # wrong branch
+    assert d[("leila", 8000, "Tunis", 9)] is True       # manager inherits teller
+    assert d[("youssef", 8000, "Tunis", 9)] is False    # customer role can't transfer
