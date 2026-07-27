@@ -39,3 +39,14 @@ def test_build_enforcer_is_cwd_independent(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     e = build_enforcer()
     assert decide(e, "amine", "account", "transfer") is True
+
+
+def test_run_demo_returns_nine_rows_with_expected_verdicts(enforcer):
+    from main import run_demo
+    rows = run_demo(enforcer)
+    assert len(rows) == 9
+    # Each row is (subject, action, resource, allowed:bool).
+    by_key = {(s, a, o): allowed for (s, a, o, allowed) in rows}
+    assert by_key[("amine", "transfer", "account")] is True
+    assert by_key[("youssef", "transfer", "account")] is False
+    assert by_key[("leila", "approve_loan", "loan")] is True
