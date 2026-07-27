@@ -1,0 +1,11 @@
+p, customer, account, view
+p, teller, account, view
+p, teller, account, transfer
+p, branch_manager, loan, approve_loan
+p, auditor, account, view
+
+g, amine, teller
+g, leila, branch_manager
+g, youssef, customer
+g, sonia, auditor
+g, branch_manager, teller
