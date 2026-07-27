@@ -1,0 +1,11 @@
+p, customer, account, view, True
+p, teller, account, view, True
+p, teller, account, transfer, r.amount <= 10000 && r.hour >= 8 && r.hour < 17 && r.sub_branch == r.obj_branch
+p, branch_manager, loan, approve_loan, True
+p, auditor, account, view, True
+
+g, amine, teller
+g, leila, branch_manager
+g, youssef, customer
+g, sonia, auditor
+g, branch_manager, teller
