@@ -1,0 +1,20 @@
+model
+  schema 1.1
+
+type user
+
+type bank
+  relations
+    define auditor: [user]
+
+type branch
+  relations
+    define bank: [bank]
+    define manager: [user]
+    define auditor: auditor from bank
+
+type account
+  relations
+    define branch: [branch]
+    define owner: [user]
+    define viewer: owner or manager from branch or auditor from branch
