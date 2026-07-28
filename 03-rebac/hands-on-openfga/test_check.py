@@ -47,3 +47,15 @@ def test_build_store_is_cwd_independent(tmp_path, monkeypatch):
     s = build_store()
     allowed, _ = check(s, "user:youssef", "account:123")
     assert allowed is True
+
+
+def test_run_demo_returns_five_rows(store):
+    from main import run_demo
+    rows = run_demo(store)
+    assert len(rows) == 5
+    d = {(s, a): allowed for (s, a, allowed, reason) in rows}
+    assert d[("user:youssef", "account:123")] is True
+    assert d[("user:leila", "account:123")] is True
+    assert d[("user:sonia", "account:123")] is True
+    assert d[("user:amine", "account:123")] is False
+    assert d[("user:leila", "account:999")] is False

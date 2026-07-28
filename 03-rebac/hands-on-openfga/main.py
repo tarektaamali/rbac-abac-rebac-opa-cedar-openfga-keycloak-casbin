@@ -65,3 +65,101 @@ def check(store, subject, account):
     if bank and store.has(subject, "auditor", bank):
         return True, f"audits {bank}"
     return False, f"no relationship path from {subject} to {account}"
+
+
+# --- Menu data ------------------------------------------------------------
+SUBJECTS = ["youssef", "leila", "sonia", "amine", "fatma"]
+ACCOUNTS = ["account:123", "account:999"]
+
+# Canonical demo scenarios: (subject, account).
+DEMO_SCENARIOS = [
+    ("user:youssef", "account:123"),
+    ("user:leila", "account:123"),
+    ("user:sonia", "account:123"),
+    ("user:amine", "account:123"),
+    ("user:leila", "account:999"),
+]
+
+
+def run_demo(store):
+    """Evaluate the canonical scenarios. Returns (subject, account, allowed, reason)."""
+    rows = []
+    for subject, account in DEMO_SCENARIOS:
+        allowed, reason = check(store, subject, account)
+        rows.append((subject, account, allowed, reason))
+    return rows
+
+
+def _print_demo(store):
+    print("\n  SafiBank ReBAC — who can view which account, and WHY\n  " + "-" * 58)
+    for subject, account, allowed, reason in run_demo(store):
+        mark = "✅ ALLOW" if allowed else "❌ DENY "
+        print(f"  {subject:<13} → {account:<12} → {mark}  ({reason})")
+    print()
+
+
+def _print_wall():
+    print(
+        """
+  ReBAC answers "is this user RELATED to this account?" beautifully.
+  But it can't answer "...and is the amount under 10,000 TND, during branch hours?"
+  That's context — ABAC's job. And roles still matter too.
+
+  Real rules need ALL THREE at once: RBAC + ABAC + ReBAC. Keeping them in sync,
+  in-app, across mobile / web / ATM backends, does not scale — and auditors want
+  ONE place to ask "who could access this account, and why?"
+
+  -> That's exactly what 04-policy-as-code does: pull every rule OUT of the app
+     into one versioned, testable, auditable engine (OPA / Rego).
+"""
+    )
+
+
+def _choose(prompt, options):
+    """Show a numbered list; accept a number or the option's lowercase name."""
+    print(prompt)
+    for i, opt in enumerate(options, 1):
+        print(f"  [{i}] {opt}")
+    raw = input("  > ").strip().lower()
+    if raw.isdigit() and 1 <= int(raw) <= len(options):
+        return options[int(raw) - 1]
+    if raw in [str(o).lower() for o in options]:
+        return raw
+    return None
+
+
+def _ask(store):
+    who = _choose("Who's asking?", SUBJECTS)
+    account = _choose("View which account?", ACCOUNTS)
+    if who is None or account is None:
+        print("  (unknown — try again)")
+        return
+    allowed, reason = check(store, f"user:{who}", account)
+    mark = "✅ ALLOW" if allowed else "❌ DENY"
+    print(f"\n  {mark} — {reason}.")
+
+
+def main():
+    store = build_store()
+    print("SafiBank Cloud — ReBAC lab (03-rebac). Type 'q' to quit.")
+    while True:
+        print("\nMenu: [1] ask a question   [2] demo (who can view, and why)   "
+              "[3] wall (the limit of relationships)   [q] quit")
+        choice = input("> ").strip().lower()
+        if choice in ("q", "quit"):
+            print("Bye.")
+            return
+        if choice in ("2", "demo"):
+            _print_demo(store)
+            continue
+        if choice in ("3", "wall"):
+            _print_wall()
+            continue
+        if choice in ("1", "ask"):
+            _ask(store)
+            continue
+        print("  (pick 1, 2, 3, or q)")
+
+
+if __name__ == "__main__":
+    main()
