@@ -1,6 +1,6 @@
 package safibank.transfer
 
-# Under OPA 1.0+ (Rego v1) `if` is built in — no `import future.keywords` needed.
+# Under OPA 1.0+ (Rego v1) the `if` keyword is built in — no keyword imports needed.
 
 default allow := false
 
