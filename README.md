@@ -133,3 +133,10 @@ Work in progress — building it chapter by chapter.
 ## 📝 License
 
 MIT — learn freely, reuse freely.
+
+---
+
+## 🤖 Built with
+
+This work was realized with **[Claude Code](https://claude.com/claude-code)** — designed,
+planned, and built chapter by chapter (spec → plan → test-driven implementation → review).
