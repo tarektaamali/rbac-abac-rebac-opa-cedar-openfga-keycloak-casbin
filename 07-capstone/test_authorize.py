@@ -49,3 +49,25 @@ def test_ordering_tenant_before_rebac():
     d = authorize(sub(branch="tunis", tenant="dinarbank"),
                   acc(branch="carthage", tenant="carthage"), 8000, 9)
     assert d.layer == "tenant"
+
+
+def test_run_demo_decides_each_gate():
+    from app import run_demo
+    rows = run_demo()
+    assert len(rows) == 7
+    d = {(s, a, amt, hr): dec for (s, a, amt, hr, dec) in rows}
+    assert d[("amine", "acc:123", 8000, 9)].allow is True
+    assert d[("amine", "acc:123", 8000, 22)].layer == "abac"
+    assert d[("amine", "acc:123", 12000, 9)].layer == "abac"
+    assert d[("amine", "acc:999", 8000, 9)].layer == "tenant"
+    assert d[("youssef", "acc:123", 8000, 9)].layer == "rbac"
+    assert d[("amine", "acc:456", 8000, 9)].layer == "rebac"
+    assert d[("leila", "acc:123", 8000, 9)].allow is True
+
+
+def test_transfer_service_executes_and_denies():
+    from app import TransferService
+    svc = TransferService()
+    assert svc.transfer("amine", "acc:123", 8000, 9).startswith("executed")
+    assert "denied at tenant" in svc.transfer("amine", "acc:999", 8000, 9)
+    assert len(svc.ledger) == 1  # only the allowed transfer was recorded
