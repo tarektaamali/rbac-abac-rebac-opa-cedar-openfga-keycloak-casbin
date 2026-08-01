@@ -110,13 +110,18 @@ The one-paragraph version:
 
 ## 🚦 Status
 
-Work in progress — building it chapter by chapter.
+**All 8 chapters complete** — every model chapter has a runnable lab; the reference chapters are done.
 
-- [x] Blueprint & glossary
-- [x] Decision tree
-- [x] Keycloak tool reference
-- [ ] `01-rbac` runnable Casbin lab
-- [ ] `02-abac` → `07-capstone`
+- [x] Blueprint & decision tree
+- [x] `00-foundations` — concepts + mental models + exercises
+- [x] `01-rbac` — runnable Casbin lab
+- [x] `02-abac` — runnable Casbin lab (the 22:00 flip)
+- [x] `03-rebac` — Zanzibar-style checker + real `model.fga`
+- [x] `04-policy-as-code` — OPA/Rego lab (`opa test`)
+- [x] `05-tools` — reference cards + Keycloak authorization deep dive
+- [x] `06-domains` — enforcement patterns (APIs, SaaS, Kubernetes, cloud-native)
+- [x] `07-capstone` — end-to-end SafiBank app
+- [ ] Optional extras — `GLOSSARY.md`, `comparisons/`, ADRs (not yet written)
 
 ---
 
