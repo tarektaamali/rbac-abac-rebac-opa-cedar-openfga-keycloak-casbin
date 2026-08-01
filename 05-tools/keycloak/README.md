@@ -8,6 +8,14 @@
 *(Running example throughout: **SafiBank Cloud**, our SaaS banking platform for Tunisian banks —
 tellers, branch managers, customers, accounts in TND, branches in Tunis / Sfax / Sousse.)*
 
+## 🧭 Which models (at a glance)
+
+| RBAC | ABAC | ReBAC | Policy-as-code |
+|:----:|:----:|:-----:|:--------------:|
+| ✅ great | ⚠️ possible (clunky) | ❌ none | ❌ weak |
+
+*Where it runs:* a standalone **identity platform** (server). *Best at:* identity, SSO, broad roles.
+
 ---
 
 ## 🧩 What it is
@@ -146,7 +154,8 @@ Amine clicks "Transfer 8,000 TND from Youssef's account"
 
 ## 🔗 See also (in this repo)
 
-- `01-rbac/` — the role concepts Keycloak implements so well
-- `02-abac/` — the attribute rules Keycloak struggles with (do these in OPA)
-- `03-rebac/` — the relationship model Keycloak can't do (do this in OpenFGA)
-- `04-policy-as-code/` — why externalizing policy beats scattering `if` statements
+- [`01-rbac`](../../01-rbac/) — the role concepts Keycloak implements so well
+- [`02-abac`](../../02-abac/) — the attribute rules Keycloak struggles with (do these in OPA)
+- [`03-rebac`](../../03-rebac/) — the relationship model Keycloak can't do (do this in OpenFGA)
+- [`04-policy-as-code`](../../04-policy-as-code/) — why externalizing policy beats scattering `if`
+- [`05-tools`](../) — compare Keycloak with the other four tools
