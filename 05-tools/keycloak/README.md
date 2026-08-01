@@ -135,6 +135,11 @@ took **five artifacts** (one a deployed script) to express what
 [`04-policy-as-code`](../../04-policy-as-code/) does in **one** readable, testable Rego file.
 That gap is exactly why fine-grained rules usually leave Keycloak.
 
+> 📚 **Want the full treatment?** See the
+> [**Keycloak Authorization deep dive**](./authorization-deep-dive.md) — the vocabulary,
+> every policy type, real token payloads, the token-bloat math, how to test policies, and the
+> feed-OPA/OpenFGA pattern, all with SafiBank examples.
+
 ---
 
 ## 👍 Avantages
@@ -219,6 +224,7 @@ Amine clicks "Transfer 8,000 TND from Youssef's account"
 
 ## 🔗 See also (in this repo)
 
+- [**Keycloak Authorization deep dive**](./authorization-deep-dive.md) — the example-rich, long-form companion to this card.
 - [`01-rbac`](../../01-rbac/) — the role concepts Keycloak implements so well
 - [`02-abac`](../../02-abac/) — the attribute rules Keycloak struggles with (do these in OPA)
 - [`03-rebac`](../../03-rebac/) — the relationship model Keycloak can't do (do this in OpenFGA)
