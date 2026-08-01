@@ -1,0 +1,6 @@
+{
+  "subject": { "role": "teller", "branch": "tunis", "manages": "" },
+  "account": { "branch": "tunis", "owner": "youssef" },
+  "amount": 8000,
+  "hour": 9
+}
