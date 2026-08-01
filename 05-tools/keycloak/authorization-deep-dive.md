@@ -219,6 +219,54 @@ expresses the *same* rule as **one** Rego file you can `opa test`. That's the tr
 
 ## 5. Getting & reading the RPT (with token examples)
 
+### 5.0 The UMA 2.0 protocol flow
+
+Before the code, here's the full round-trip. The client never asks *"am I allowed?"* directly
+— it gets a **permission ticket** from the resource server, redeems it for an **RPT** at
+Keycloak (the PDP), then retries with the RPT:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Amine's client
+    participant RS as transfer-service<br/>(Resource Server / PEP)
+    participant KC as Keycloak<br/>(Authorization Server / PDP)
+
+    C->>RS: GET /transfer  (access token, no RPT)
+    RS->>KC: Protection API — create permission ticket<br/>for transaction#transfer
+    KC-->>RS: permission ticket
+    RS-->>C: 401 Unauthorized<br/>WWW-Authenticate: UMA as_uri, ticket
+
+    C->>KC: POST /token<br/>grant_type=uma-ticket + ticket + access token
+    Note over KC: PDP evaluates can-transfer<br/>staff ✓ · branch-hours ? · amount-branch ✓
+
+    alt all policies pass (e.g. 09:00)
+        KC-->>C: 200 + RPT (grants transaction#transfer)
+        C->>RS: GET /transfer  (with RPT)
+        RS->>RS: validate RPT — grants transfer?
+        RS-->>C: 200 OK — transfer executed
+    else a policy fails (e.g. 22:00)
+        KC-->>C: 403 Forbidden — no RPT issued
+        C-->>C: request denied
+    end
+```
+
+**Reading the flow:**
+
+1. **①–④** the client hits the resource server with only its *access token*; the RS (PEP)
+   fetches a **permission ticket** naming what's needed (`transaction#transfer`) and hands it
+   back in a `401`.
+2. **⑤–⑥** the client redeems `ticket + access token` at Keycloak's token endpoint with the
+   **UMA grant**; Keycloak (PDP) evaluates the `can-transfer` policies.
+3. **⑦–⑩ (allow)** Keycloak returns an **RPT**; the client retries with it and the RS lets the
+   request through.
+4. **(deny)** if any policy fails — Amine at **22:00** — Keycloak returns **403** and never
+   issues an RPT, so the retry never happens.
+
+> Note the **two extra network hops** (ticket, then RPT) *per protected call* — this is the
+> latency the card means by "UMA/RPT round-trips add latency." Coarse role checks read from
+> the access token skip all of this.
+
 ### 5.1 Ask for the decision
 
 The client exchanges its access token for an **RPT** at the token endpoint (UMA grant):
