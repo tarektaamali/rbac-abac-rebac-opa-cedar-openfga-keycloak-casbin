@@ -82,6 +82,66 @@ This is why a dedicated policy engine (OPA/Cedar) is cleaner for ABAC.
 
 ---
 
+## 🧪 Worked example — the SafiBank transfer rule, assembled in Keycloak
+
+The canonical rule — *a teller may transfer ≤ 10,000 TND, during branch hours, from an
+account in their own branch* — built the Keycloak way, one artifact at a time. *(Illustrative;
+exact console fields vary by version.)*
+
+**1. A Role policy** — only staff qualify:
+```
+Policy type: Role
+Name:        teller-or-manager
+Roles:       teller, branch_manager   (any)
+```
+
+**2. A Time policy** — branch hours only:
+```
+Policy type: Time
+Name:        branch-hours
+Not before / Not on-or-after: 08:00 – 17:00
+```
+
+**3. A JavaScript policy** — the parts roles and time can't express (amount + same branch),
+deployed as a server-side script artifact:
+```js
+// amount-and-branch.js
+var ctx    = $evaluation.getContext();
+var attrs  = ctx.getAttributes();
+var amount = parseInt(attrs.getValue('amount').asString(0));
+var userBr = ctx.getIdentity().getAttributes().getValue('branch').asString(0);
+var acctBr = attrs.getValue('account_branch').asString(0);
+if (amount <= 10000 && userBr == acctBr) { $evaluation.grant(); }
+```
+
+**4. An Aggregated policy** — combine all three, **unanimous** (all must pass):
+```
+Policy type: Aggregated
+Name:        can-transfer
+Policies:    teller-or-manager, branch-hours, amount-and-branch
+Decision:    Unanimous (AND)
+```
+
+**5. A Permission** ties the aggregated policy to the action + resource:
+```
+Resource: transaction
+Scope:    transfer
+Apply:    can-transfer
+```
+
+At request time Keycloak evaluates `can-transfer` and returns the verdict inside Amine's
+**RPT**. *"8,000 TND at 22:00"* → the **Time policy** fails → **deny**. ✅ correct — but note it
+took **five artifacts** (one a deployed script) to express what
+[`04-policy-as-code`](../../04-policy-as-code/) does in **one** readable, testable Rego file.
+That gap is exactly why fine-grained rules usually leave Keycloak.
+
+> 📚 **Want the full treatment?** See the
+> [**Keycloak Authorization deep dive**](./authorization-deep-dive.md) — the vocabulary,
+> every policy type, real token payloads, the token-bloat math, how to test policies, and the
+> feed-OPA/OpenFGA pattern, all with SafiBank examples.
+
+---
+
 ## 👍 Avantages
 
 - **All-in-one identity + authZ** — OIDC/SAML login, SSO, user federation *and* RBAC in one product.
@@ -100,6 +160,16 @@ This is why a dedicated policy engine (OPA/Cedar) is cleaner for ABAC.
   `customer → owns → account → belongs to → branch → belongs to → bank`.
 - **Doesn't scale to per-object authorization** — don't create a Keycloak "resource" per bank
   account; UMA/RPT round-trips add latency. OpenFGA is built for that volume; Keycloak isn't.
+- **Per-object permissions bloat the token** — with the RPT flow, granted permissions are
+  carried **inside the token itself** (the RPT is a JWT). Model many resources (say, one per
+  account) and the token grows with them:
+  - the JWT rides in the `Authorization` header on **every** request → more bandwidth + parsing cost;
+  - it can blow past **header/cookie size limits** (proxies and servers often cap headers at
+    4–8 KB — an oversized token gets rejected or silently truncated);
+  - permissions baked into a token are **hard to revoke** before it expires (you'd wait out the
+    TTL or force re-auth);
+  - so keep tokens **small and coarse** (identity + broad roles), and resolve per-object access
+    at request time with a dedicated engine ([`OpenFGA`](../openfga/)) — don't stuff it into the token.
 - **Weak policy-as-code story** — policies live in Keycloak's database, not natively in Git, so
   diffing / CI testing is harder.
 - **Enforcement (PEP) is Java-centric** — official policy-enforcer adapters favor Java; other
@@ -154,6 +224,7 @@ Amine clicks "Transfer 8,000 TND from Youssef's account"
 
 ## 🔗 See also (in this repo)
 
+- [**Keycloak Authorization deep dive**](./authorization-deep-dive.md) — the example-rich, long-form companion to this card.
 - [`01-rbac`](../../01-rbac/) — the role concepts Keycloak implements so well
 - [`02-abac`](../../02-abac/) — the attribute rules Keycloak struggles with (do these in OPA)
 - [`03-rebac`](../../03-rebac/) — the relationship model Keycloak can't do (do this in OpenFGA)
