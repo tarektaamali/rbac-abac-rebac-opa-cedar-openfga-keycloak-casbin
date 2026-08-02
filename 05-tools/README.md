@@ -13,10 +13,13 @@ on?"* to a model + tool. These cards are the per-tool detail behind that map.
 | [Casbin](./casbin/) | in-process library | ✅ | ✅ | ⚠️ | ⚠️ | lightweight in-app authz | [01](../01-rbac/), [02](../02-abac/) |
 | [OPA](./opa/) | server / CLI / sidecar | ✅ | ✅ | ⚠️ | ✅ | general policy engine, K8s, microservices | [04](../04-policy-as-code/) |
 | [Cedar](./cedar/) | library / language | ✅ | ✅ | ⚠️ | ✅ | ergonomic, **analyzable** policies | — |
-| [OpenFGA](./openfga/) | server (Zanzibar) | ⚠️ | ❌ | ✅ | ⚠️ | relationships, sharing, hierarchy | [03](../03-rebac/) |
+| [OpenFGA](./openfga/) | server (Zanzibar) | ⚠️ | ⚠️¹ | ✅ | ⚠️ | relationships, sharing, hierarchy | [03](../03-rebac/) |
 | [Keycloak](./keycloak/) | identity platform | ✅ | ⚠️ | ❌ | ❌ | identity, SSO, broad roles | — |
 
 Legend: ✅ great · ⚠️ possible / awkward · ❌ not really.
+
+¹ OpenFGA's core is pure relationships, but **Conditions** (CEL) add limited context — time,
+IP, expiry — *on* a relationship. See the [OpenFGA card → Advanced](./openfga/#-advanced--conditions-abac-inside-openfga).
 
 ## The one-paragraph guide
 
